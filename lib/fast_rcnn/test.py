@@ -230,6 +230,7 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
     # all detections are collected into:
     #    all_boxes[cls][image] = N x 5 array of detections in
     #    (x1, y1, x2, y2, score)
+    print "num_images:",num_images
     all_boxes = [[[] for _ in xrange(num_images)]
                  for _ in xrange(imdb.num_classes)]
 
@@ -237,10 +238,12 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
 
     # timers
     _t = {'im_detect' : Timer(), 'misc' : Timer()}
-
+    print "cfg.TEST.HAS_RPN:",cfg.TEST.HAS_RPN
     if not cfg.TEST.HAS_RPN:
         roidb = imdb.roidb
-
+    dets_result_file = output_dir+'/submission.txt'
+    dets_result_f = open(dets_result_file,'w')
+    
     for i in xrange(num_images):
         # filter out any ground truth boxes
         if cfg.TEST.HAS_RPN:
@@ -257,9 +260,13 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
         _t['im_detect'].tic()
         scores, boxes = im_detect(net, im, box_proposals)
         _t['im_detect'].toc()
+        np.savetxt(output_dir+'/'+os.path.splitext(os.path.basename(imdb.image_path_at(i)))[0]+'_scores.txt', scores, delimiter=',') 
+        np.savetxt(output_dir+'/'+os.path.splitext(os.path.basename(imdb.image_path_at(i)))[0]+'_boxes.txt', boxes, delimiter=',') 
 
         _t['misc'].tic()
         # skip j = 0, because it's the background class
+        scores_challenge = np.zeros((imdb.num_classes,))
+        N_challenge = 0;
         for j in xrange(1, imdb.num_classes):
             inds = np.where(scores[:, j] > thresh)[0]
             cls_scores = scores[inds, j]
@@ -271,7 +278,14 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
             if vis:
                 vis_detections(im, imdb.classes[j], cls_dets)
             all_boxes[j][i] = cls_dets
-
+            scores_challenge = scores_challenge + np.sum(scores[inds,:][keep,:],axis=0);
+            N_challenge = N_challenge+scores[inds,:][keep,:].shape[0]
+        print "N_challenge = ",N_challenge
+        if N_challenge > 0:
+            scores_challenge = scores_challenge/N_challenge
+        else:
+            scores_challenge[0] = 1
+        dets_result_f.write(os.path.splitext(os.path.basename(imdb.image_path_at(i)))[0]+'.jpg,'+','.join(map(str,scores_challenge))+'\n')
         # Limit to max_per_image detections *over all classes*
         if max_per_image > 0:
             image_scores = np.hstack([all_boxes[j][i][:, -1]
@@ -286,7 +300,7 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
         print 'im_detect: {:d}/{:d} {:.3f}s {:.3f}s' \
               .format(i + 1, num_images, _t['im_detect'].average_time,
                       _t['misc'].average_time)
-
+    dets_result_f.close()
     det_file = os.path.join(output_dir, 'detections.pkl')
     with open(det_file, 'wb') as f:
         cPickle.dump(all_boxes, f, cPickle.HIGHEST_PROTOCOL)

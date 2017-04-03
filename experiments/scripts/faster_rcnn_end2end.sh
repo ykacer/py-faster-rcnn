@@ -38,6 +38,24 @@ case $DATASET in
     PT_DIR="coco"
     ITERS=490000
     ;;
+  fish)
+    TRAIN_IMDB="fish_2017_trainval"
+    TEST_IMDB="fish_2017_test"
+    PT_DIR="fish"
+    ITERS=70000
+    ;;
+  multi_fish)
+    TRAIN_IMDB="multi_fish_2017_trainval"
+    TEST_IMDB="multi_fish_2017_test"
+    PT_DIR="multi_fish"
+    ITERS=70000
+    ;;
+  newspapers)
+    TRAIN_IMDB="newspapers_2017_trainval"
+    TEST_IMDB="newspapers_2017_test"
+    PT_DIR="newspapers"
+    ITERS=10000
+    ;;
   *)
     echo "No dataset given"
     exit
@@ -48,18 +66,20 @@ LOG="experiments/logs/faster_rcnn_end2end_${NET}_${EXTRA_ARGS_SLUG}.txt.`date +'
 exec &> >(tee -a "$LOG")
 echo Logging output to "$LOG"
 
-time ./tools/train_net.py --gpu ${GPU_ID} \
-  --solver models/${PT_DIR}/${NET}/faster_rcnn_end2end/solver.prototxt \
-  --weights data/imagenet_models/${NET}.v2.caffemodel \
-  --imdb ${TRAIN_IMDB} \
-  --iters ${ITERS} \
-  --cfg experiments/cfgs/faster_rcnn_end2end.yml \
-  ${EXTRA_ARGS}
+#time ./tools/train_net.py --gpu ${GPU_ID} \
+#  --solver models/${PT_DIR}/${NET}/faster_rcnn_end2end/solver.prototxt \
+#  --weights data/imagenet_models/${NET}.v2.caffemodel \
+#  --imdb ${TRAIN_IMDB} \
+#  --iters ${ITERS} \
+#  --cfg experiments/cfgs/faster_rcnn_end2end.yml \
+#  ${EXTRA_ARGS}
 
 set +x
-NET_FINAL=`grep -B 1 "done solving" ${LOG} | grep "Wrote snapshot" | awk '{print $4}'`
+#NET_FINAL="output/faster_rcnn_end2end/fish_2017_trainval/vgg_cnn_m_1024_faster_rcnn_iter_50000.caffemodel"
+NET_FINAL="output/faster_rcnn_end2end/newspapers_2017_trainval/vgg_cnn_m_1024_faster_rcnn_iter_10000.caffemodel"
+#NET_FINAL=`grep -B 1 "done solving" ${LOG} | grep "Wrote snapshot" | awk '{print $4}'`
 set -x
-
+echo $NET_FINAL
 time ./tools/test_net.py --gpu ${GPU_ID} \
   --def models/${PT_DIR}/${NET}/faster_rcnn_end2end/test.prototxt \
   --net ${NET_FINAL} \

@@ -11,6 +11,10 @@ __sets = {}
 
 from datasets.pascal_voc import pascal_voc
 from datasets.coco import coco
+from datasets.fish import fish
+from datasets.multi_fish import multi_fish
+from datasets.newspapers import newspapers
+
 import numpy as np
 
 # Set up voc_<year>_<split> using selective search "fast" mode
@@ -30,6 +34,24 @@ for year in ['2015']:
     for split in ['test', 'test-dev']:
         name = 'coco_{}_{}'.format(year, split)
         __sets[name] = (lambda split=split, year=year: coco(split, year))
+
+# Set up fish_2017_<split>
+for year in ['2017']:
+    for split in ['train', 'val', 'trainval', 'test']:
+        name = 'fish_{}_{}'.format(year, split)
+        __sets[name] = (lambda split=split, year=year: fish(split, year))
+
+# Set up multi_fish_<split>
+for year in ['2017']:
+    for split in ['train', 'val', 'trainval', 'test']:
+        name = 'multi_fish_{}_{}'.format(year, split)
+        __sets[name] = (lambda split=split, year=year: multi_fish(split, year))
+
+# Set up multi_fish_<split>
+for year in ['2017']:
+    for split in ['train', 'val', 'trainval', 'test']:
+        name = 'newspapers_{}_{}'.format(year, split)
+        __sets[name] = (lambda split=split, year=year: newspapers(split, year))
 
 def get_imdb(name):
     """Get an imdb (image database) by name."""
