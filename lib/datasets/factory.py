@@ -14,6 +14,7 @@ from datasets.coco import coco
 from datasets.fish import fish
 from datasets.multi_fish import multi_fish
 from datasets.newspapers import newspapers
+from datasets.ocr import ocr
 
 import numpy as np
 
@@ -47,11 +48,17 @@ for year in ['2017']:
         name = 'multi_fish_{}_{}'.format(year, split)
         __sets[name] = (lambda split=split, year=year: multi_fish(split, year))
 
-# Set up multi_fish_<split>
+# Set up newspapers_<split>
 for year in ['2017']:
     for split in ['train', 'val', 'trainval', 'test']:
         name = 'newspapers_{}_{}'.format(year, split)
         __sets[name] = (lambda split=split, year=year: newspapers(split, year))
+
+# Set up ocr_<split>
+for year in ['2017']:
+    for split in ['train', 'val', 'trainval', 'test']:
+        name = 'ocr_{}_{}'.format(year, split)
+        __sets[name] = (lambda split=split, year=year: ocr(split, year))
 
 def get_imdb(name):
     """Get an imdb (image database) by name."""
