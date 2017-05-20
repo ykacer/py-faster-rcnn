@@ -45,6 +45,12 @@ case $DATASET in
     PT_DIR="multi_fish"
     ITERS=40000
     ;;
+  ocr)
+    TRAIN_IMDB="ocr_2017_trainval"
+    TEST_IMDB="ocr_2017_test"
+    PT_DIR="ocr"
+    ITERS=40000
+    ;;
   *)
     echo "No dataset given"
     exit
