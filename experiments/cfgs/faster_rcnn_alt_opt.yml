@@ -1,5 +1,5 @@
 EXP_DIR: faster_rcnn_alt_opt
-MODELS_DIR: '/home/kyoucef/py-faster-rcnn/models/multi_fish'
+MODELS_DIR: '/home/kyoucef/py-faster-rcnn/models/newspapers'
 TRAIN:
   BG_THRESH_LO: 0.0
 TEST:
